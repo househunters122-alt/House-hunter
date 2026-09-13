@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HouseHunters - Modern Portal</title>
+  <title>HouseHunters - Secured Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #2563eb;
       --primary-dark: #1d4ed8;
       --accent: #10b981;
+      --danger: #ef4444;
       --bg: #0f172a;
       --surface: #1e293b;
       --surface-card: #334155;
@@ -24,7 +25,7 @@
 
     /* Navigation */
     header {
-      background: rgba(30, 41, 59, 0.8);
+      background: rgba(30, 41, 59, 0.85);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
@@ -68,6 +69,7 @@
     .btn:hover { background: var(--primary-dark); }
     .btn-accent { background: var(--accent); }
     .btn-accent:hover { background: #059669; }
+    .btn-danger { background: var(--danger); width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem; }
 
     .auth-box { max-width: 420px; margin: 3rem auto; }
     .toggle-auth { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
@@ -115,7 +117,7 @@
     <nav>
       <button onclick="showPage('main-dashboard')" id="nav-main" class="active">Main Dashboard</button>
       <button onclick="showPage('auth-page')" id="nav-auth">Register / Login</button>
-      <button onclick="showPage('mod-dashboard')" id="nav-mod">Moderator Panel</button>
+      <button onclick="handleModNavigation()" id="nav-mod">Moderator Panel 🔒</button>
     </nav>
   </header>
 
@@ -135,7 +137,6 @@
 
       <h2 style="margin-bottom: 1.5rem;">Vacant Houses Available</h2>
       <div class="grid" id="listings-container">
-        <!-- Sample Listing -->
         <div class="house-card">
           <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=600&q=80" alt="House">
           <div class="house-body">
@@ -175,8 +176,28 @@
       </div>
     </div>
 
+    <!-- MODERATOR LOGIN -->
+    <div id="mod-login-page" class="page">
+      <div class="card auth-box">
+        <h2 style="margin-bottom: 0.5rem; text-align: center;">Moderator Access 🔒</h2>
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Enter the administrative key to manage listings.</p>
+        <form onsubmit="handleModLogin(event)">
+          <div class="form-group">
+            <label>Admin Access Code</label>
+            <input type="password" id="mod-key" required placeholder="Enter Secret Code (Default: MOD2026)">
+          </div>
+          <button type="submit" class="btn btn-accent">Unlock Panel</button>
+        </form>
+      </div>
+    </div>
+
     <!-- MODERATOR DASHBOARD -->
     <div id="mod-dashboard" class="page">
+      <div style="display: flex; justify-content: space-between; align-items: center; max-width: 650px; margin: 0 auto 1rem auto;">
+        <h3>Moderator Dashboard Active</h3>
+        <button class="btn btn-danger" onclick="logoutMod()">Lock Panel</button>
+      </div>
+
       <div class="card" style="max-width: 650px; margin: 0 auto 2rem auto;">
         <h2 style="margin-bottom: 1rem;">📢 Broadcast Announcement</h2>
         <form onsubmit="postBroadcast(event)">
@@ -244,7 +265,9 @@
 
   <script>
     let currentUser = null;
+    let isModAuthenticated = false;
     let selectedHouse = '';
+    const MOD_PASSCODE = "MOD2026"; // Change secret key here
 
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -253,7 +276,33 @@
       document.getElementById(pageId).classList.add('active');
       if(pageId === 'main-dashboard') document.getElementById('nav-main').classList.add('active');
       if(pageId === 'auth-page') document.getElementById('nav-auth').classList.add('active');
-      if(pageId === 'mod-dashboard') document.getElementById('nav-mod').classList.add('active');
+      if(pageId === 'mod-dashboard' || pageId === 'mod-login-page') document.getElementById('nav-mod').classList.add('active');
+    }
+
+    function handleModNavigation() {
+      if (isModAuthenticated) {
+        showPage('mod-dashboard');
+      } else {
+        showPage('mod-login-page');
+      }
+    }
+
+    function handleModLogin(e) {
+      e.preventDefault();
+      const inputCode = document.getElementById('mod-key').value;
+      if (inputCode === MOD_PASSCODE) {
+        isModAuthenticated = true;
+        showPage('mod-dashboard');
+        document.getElementById('mod-key').value = '';
+      } else {
+        alert('Invalid Moderator Key!');
+      }
+    }
+
+    function logoutMod() {
+      isModAuthenticated = false;
+      showPage('main-dashboard');
+      alert('Moderator session locked.');
     }
 
     function toggleAuthMode(showRegister) {
@@ -344,7 +393,7 @@
       } else if (query.includes('pay') || query.includes('commission') || query.includes('location')) {
         reply = "To get exact locations, click 'Interested' on any house card and submit Ksh 500 via M-Pesa to 0792102645.";
       } else if (query.includes('mod') || query.includes('post')) {
-        reply = "Moderators can post vacant houses and broadcast announcements via the Moderator Panel!";
+        reply = "Moderators must log in with their key to post vacant houses or broadcast announcements.";
       }
 
       setTimeout(() => {
