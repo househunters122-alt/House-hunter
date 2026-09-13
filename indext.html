@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HouseHunters - Portal</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+
+    /* Navigation */
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo { font-size: 1.25rem; font-weight: bold; color: var(--primary); }
+    nav button {
+      background: none; border: none; font-size: 0.95rem; font-weight: 500;
+      color: var(--text-muted); cursor: pointer; margin-left: 1rem; padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+    }
+    nav button.active, nav button:hover { color: var(--primary); background-color: #eff6ff; }
+
+    .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Forms */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+    input, select, textarea {
+      width: 100%; padding: 0.6rem; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.95rem; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    .btn {
+      background-color: var(--primary); color: white; border: none;
+      padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 500;
+      cursor: pointer; width: 100%; transition: background 0.2s;
+    }
+    .btn:hover { background-color: var(--primary-hover); }
+
+    /* Login Box Specifics */
+    .login-box { max-width: 400px; margin: 4rem auto; }
+
+    /* Listings Grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .listing-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .listing-card img { width: 100%; height: 180px; object-fit: cover; }
+    .listing-content { padding: 1rem; }
+    .price { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-bottom: 0.25rem; }
+    .details { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .badge {
+      display: inline-block; background: #dcfce7; color: #166534;
+      padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">HouseHunters</div>
+    <nav>
+      <button onclick="showPage('login-page')" id="nav-login" class="active">Login</button>
+      <button onclick="showPage('user-dashboard')" id="nav-dashboard">User Dashboard</button>
+      <button onclick="showPage('mod-dashboard')" id="nav-mod">Moderator Panel</button>
+    </nav>
+  </header>
+
+  <div class="container">
+    
+    <!-- LOGIN PAGE -->
+    <div id="login-page" class="page active">
+      <div class="card login-box">
+        <h2 style="margin-bottom: 1rem; text-align: center;">Sign In</h2>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" required placeholder="user@example.com">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" required placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="role-select">
+              <option value="user">User</option>
+              <option value="moderator">Moderator</option>
+            </select>
+          </div>
+          <button type="submit" class="btn">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- USER DASHBOARD -->
+    <div id="user-dashboard" class="page">
+      <h2 style="margin-bottom: 1.5rem;">Available Properties & Alerts</h2>
+      <div class="grid" id="listings-container">
+        <!-- Default Posted Item -->
+        <div class="listing-card">
+          <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=600&q=80" alt="Room Image">
+          <div class="listing-content">
+            <div class="price">$1,200 / month</div>
+            <div class="details">Size: 450 sq ft | 2 Rooms</div>
+            <span class="badge">1 Vacancy Available</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODERATOR DASHBOARD -->
+    <div id="mod-dashboard" class="page">
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <h2 style="margin-bottom: 1rem;">Post New Room Alert</h2>
+        <form onsubmit="addListing(event)">
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="url" id="mod-image" required placeholder="https://images.unsplash.com/...">
+          </div>
+          <div class="form-group">
+            <label>Price ($/month)</label>
+            <input type="number" id="mod-price" required placeholder="1200">
+          </div>
+          <div class="form-group">
+            <label>Room Size / Description</label>
+            <input type="text" id="mod-size" required placeholder="e.g., 500 sq ft (Studio)">
+          </div>
+          <div class="form-group">
+            <label>Vacant Rooms Available</label>
+            <input type="number" id="mod-vacant" required placeholder="2">
+          </div>
+          <button type="submit" class="btn">Post Property Alert</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(pageId).classList.add('active');
+      if(pageId === 'login-page') document.getElementById('nav-login').classList.add('active');
+      if(pageId === 'user-dashboard') document.getElementById('nav-dashboard').classList.add('active');
+      if(pageId === 'mod-dashboard') document.getElementById('nav-mod').classList.add('active');
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const role = document.getElementById('role-select').value;
+      if (role === 'moderator') {
+        showPage('mod-dashboard');
+      } else {
+        showPage('user-dashboard');
+      }
+    }
+
+    function addListing(event) {
+      event.preventDefault();
+      const image = document.getElementById('mod-image').value;
+      const price = document.getElementById('mod-price').value;
+      const size = document.getElementById('mod-size').value;
+      const vacant = document.getElementById('mod-vacant').value;
+
+      const container = document.getElementById('listings-container');
+      const card = document.createElement('div');
+      card.className = 'listing-card';
+      card.innerHTML = `
+        <img src="${image}" alt="Property Image">
+        <div class="listing-content">
+          <div class="price">$${price} / month</div>
+          <div class="details">Size: ${size}</div>
+          <span class="badge">${vacant} Vacancy Available</span>
+        </div>
+      `;
+      
+      container.prepend(card);
+      showPage('user-dashboard');
+      event.target.reset();
+    }
+  </script>
+</body>
+</html>
