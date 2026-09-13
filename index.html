@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HouseHunters - Secured Portal</title>
+  <title>HouseHunters - Interactive Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -90,6 +90,9 @@
     .price { font-size: 1.25rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.25rem; }
     .badge { display: inline-block; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem; }
     
+    /* Message Cards */
+    .msg-card { background: var(--surface-card); padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; border-left: 4px solid var(--primary); }
+
     /* Modal */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 200; }
     .modal.active { display: flex; }
@@ -125,13 +128,11 @@
 
     <!-- MAIN DASHBOARD -->
     <div id="main-dashboard" class="page active">
-      
-      <!-- Moderator Broadcast -->
       <div class="broadcast-banner" id="broadcast-container">
         <span style="font-size: 1.5rem;">📢</span>
         <div>
           <strong style="display: block; font-size: 0.85rem; text-transform: uppercase; opacity: 0.8;">Moderator Announcement</strong>
-          <span id="broadcast-text">Welcome to HouseHunters! Register and unlock location info by securing your room reservation fee.</span>
+          <span id="broadcast-text">Welcome to HouseHunters! Register and send inquiries directly to the moderator to request locations.</span>
         </div>
       </div>
 
@@ -145,7 +146,7 @@
               <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">Spacious 2 Bedroom Apartment</div>
               <span class="badge">2 Vacancies Left</span>
             </div>
-            <button class="btn" onclick="openContactModal('Spacious 2 Bedroom Apartment')">Interested / Get Location</button>
+            <button class="btn" onclick="openContactModal('Spacious 2 Bedroom Apartment')">Interested / Contact Mod</button>
           </div>
         </div>
       </div>
@@ -156,9 +157,9 @@
       <div class="card auth-box" id="register-card">
         <h2 style="margin-bottom: 1rem; text-align: center;">Register Account</h2>
         <form onsubmit="handleAuth(event, 'register')">
-          <div class="form-group"><label>Full Name</label><input type="text" required placeholder="John Doe"></div>
-          <div class="form-group"><label>Phone Number</label><input type="tel" required placeholder="0712345678"></div>
-          <div class="form-group"><label>Email Address</label><input type="email" required placeholder="user@example.com"></div>
+          <div class="form-group"><label>Full Name</label><input type="text" id="reg-name" required placeholder="John Doe"></div>
+          <div class="form-group"><label>Phone Number</label><input type="tel" id="reg-phone" required placeholder="0712345678"></div>
+          <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" required placeholder="user@example.com"></div>
           <div class="form-group"><label>Password</label><input type="password" required placeholder="••••••••"></div>
           <button type="submit" class="btn btn-accent">Create Account</button>
         </form>
@@ -180,11 +181,11 @@
     <div id="mod-login-page" class="page">
       <div class="card auth-box">
         <h2 style="margin-bottom: 0.5rem; text-align: center;">Moderator Access 🔒</h2>
-        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Enter the administrative key to manage listings.</p>
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Enter the administrative key to manage listings and messages.</p>
         <form onsubmit="handleModLogin(event)">
           <div class="form-group">
             <label>Admin Access Code</label>
-            <input type="password" id="mod-key" required placeholder="Enter Secret Code (Default: MOD2026)">
+            <input type="password" id="mod-key" required placeholder="Secret Code (MOD2026)">
           </div>
           <button type="submit" class="btn btn-accent">Unlock Panel</button>
         </form>
@@ -194,8 +195,16 @@
     <!-- MODERATOR DASHBOARD -->
     <div id="mod-dashboard" class="page">
       <div style="display: flex; justify-content: space-between; align-items: center; max-width: 650px; margin: 0 auto 1rem auto;">
-        <h3>Moderator Dashboard Active</h3>
+        <h3>Moderator Dashboard</h3>
         <button class="btn btn-danger" onclick="logoutMod()">Lock Panel</button>
+      </div>
+
+      <!-- User Messages Inbox -->
+      <div class="card" style="max-width: 650px; margin: 0 auto 2rem auto;">
+        <h2 style="margin-bottom: 1rem;">📥 User Messages & Inquiries</h2>
+        <div id="inbox-container">
+          <p style="color: var(--text-muted); font-size: 0.9rem;">No messages received yet.</p>
+        </div>
       </div>
 
       <div class="card" style="max-width: 650px; margin: 0 auto 2rem auto;">
@@ -216,7 +225,6 @@
           <div class="form-group"><label>Monthly Rent (Ksh)</label><input type="number" id="mod-price" required placeholder="12000"></div>
           <div class="form-group"><label>House Details & Size</label><input type="text" id="mod-size" required placeholder="e.g., 1 Bedroom, Bedsitter, Studio"></div>
           <div class="form-group"><label>Vacant Units Available</label><input type="number" id="mod-vacant" required placeholder="1"></div>
-          <div class="form-group"><label>Exact Location (Hidden until payment)</label><input type="text" id="mod-location" required placeholder="e.g., Westlands, 3rd Floor, Door B2"></div>
           <button type="submit" class="btn">Post House Listing</button>
         </form>
       </div>
@@ -224,25 +232,24 @@
 
   </div>
 
-  <!-- CONTACT & MPESA PAYMENT MODAL -->
+  <!-- CONTACT MODERATOR & PAYMENT MODAL -->
   <div class="modal" id="contact-modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 0.5rem;" id="modal-house-title">House Location Request</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-        To unlock exact location & contact moderator directly, complete the commission payment below.
+      <h3 style="margin-bottom: 0.5rem;" id="modal-house-title">Contact Moderator</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Send a direct message to the moderator or submit your Ksh 500 payment code (0792102645) to receive the exact house location.
       </p>
-      
-      <div style="background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem; font-size: 0.9rem;">
-        <p><strong>Commission Amount:</strong> Ksh 500</p>
-        <p><strong>M-Pesa Number:</strong> <span style="color: #60a5fa; font-weight: bold;">0792102645</span></p>
-      </div>
 
-      <form onsubmit="verifyPayment(event)">
+      <form onsubmit="sendMessageToMod(event)">
         <div class="form-group">
-          <label>Enter M-Pesa Transaction Code</label>
-          <input type="text" id="mpesa-code" required placeholder="e.g. QX789210AB" style="text-transform: uppercase;">
+          <label>Your Message / Inquiry</label>
+          <textarea id="user-msg-input" rows="3" required placeholder="Ask about house availability, location, or send transaction details..."></textarea>
         </div>
-        <button type="submit" class="btn btn-accent">Submit Payment Code</button>
+        <div class="form-group">
+          <label>M-Pesa Code (Optional - Ksh 500 to 0792102645)</label>
+          <input type="text" id="mpesa-code" placeholder="e.g. QX789210AB" style="text-transform: uppercase;">
+        </div>
+        <button type="submit" class="btn btn-accent">Send Message to Moderator</button>
       </form>
       <button class="btn" onclick="closeModal()" style="margin-top: 0.5rem; background: transparent; color: var(--text-muted);">Cancel</button>
     </div>
@@ -254,7 +261,7 @@
     <div class="ai-box" id="ai-box">
       <div class="ai-header">AI Assist Helper</div>
       <div class="ai-messages" id="ai-messages">
-        <div class="msg bot">Hello! I'm your HouseHunters Assistant. Ask me how to register, view vacant houses, or request house locations!</div>
+        <div class="msg bot">Hello! I'm your HouseHunters Assistant. Ask me how to contact the moderator or register!</div>
       </div>
       <form class="ai-input" onsubmit="handleAISubmit(event)">
         <input type="text" id="ai-user-input" placeholder="Type a question..." required>
@@ -267,7 +274,8 @@
     let currentUser = null;
     let isModAuthenticated = false;
     let selectedHouse = '';
-    const MOD_PASSCODE = "MOD2026"; // Change secret key here
+    const MOD_PASSCODE = "MOD2026";
+    const messagesList = [];
 
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -312,20 +320,24 @@
 
     function handleAuth(event, type) {
       event.preventDefault();
-      currentUser = { registered: true };
-      alert(type === 'register' ? 'Registration successful! You are now logged in.' : 'Logged in successfully!');
+      const name = document.getElementById('reg-name').value || 'User';
+      const phone = document.getElementById('reg-phone').value || 'Not provided';
+      const email = document.getElementById('reg-email').value || 'user@example.com';
+      
+      currentUser = { name, phone, email };
+      alert('Account action successful! You are now logged in.');
       showPage('main-dashboard');
-      document.getElementById('nav-auth').innerText = 'Account (Logged In)';
+      document.getElementById('nav-auth').innerText = `Logged in: ${name}`;
     }
 
     function openContactModal(houseTitle) {
       if (!currentUser) {
-        alert('You must register or log in first before requesting a house location!');
+        alert('You must register or log in first before messaging the moderator!');
         showPage('auth-page');
         return;
       }
       selectedHouse = houseTitle;
-      document.getElementById('modal-house-title').innerText = houseTitle;
+      document.getElementById('modal-house-title').innerText = `Inquiry: ${houseTitle}`;
       document.getElementById('contact-modal').classList.add('active');
     }
 
@@ -333,11 +345,40 @@
       document.getElementById('contact-modal').classList.remove('active');
     }
 
-    function verifyPayment(event) {
+    function sendMessageToMod(event) {
       event.preventDefault();
+      const text = document.getElementById('user-msg-input').value;
       const code = document.getElementById('mpesa-code').value;
-      alert(`Payment code ${code} submitted! Moderator notified. Details sent to your account.`);
+
+      messagesList.push({
+        sender: currentUser.name,
+        phone: currentUser.phone,
+        house: selectedHouse,
+        text: text,
+        code: code || 'N/A'
+      });
+
+      renderInbox();
+      alert('Your message has been sent to the moderator successfully!');
       closeModal();
+      event.target.reset();
+    }
+
+    function renderInbox() {
+      const inboxContainer = document.getElementById('inbox-container');
+      if (messagesList.length === 0) {
+        inboxContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">No messages received yet.</p>`;
+        return;
+      }
+
+      inboxContainer.innerHTML = messagesList.map(m => `
+        <div class="msg-card">
+          <div style="font-weight: 600; font-size: 0.95rem;">${m.sender} (${m.phone})</div>
+          <div style="font-size: 0.8rem; color: #60a5fa; margin-bottom: 0.4rem;">Regarding: ${m.house}</div>
+          <div style="font-size: 0.9rem; margin-bottom: 0.4rem;">"${m.text}"</div>
+          <div style="font-size: 0.8rem; color: #34d399;">M-Pesa Code: ${m.code}</div>
+        </div>
+      `).join('');
     }
 
     function postBroadcast(event) {
@@ -366,7 +407,7 @@
             <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">${size}</div>
             <span class="badge">${vacant} Vacancies Left</span>
           </div>
-          <button class="btn" onclick="openContactModal('${size}')">Interested / Get Location</button>
+          <button class="btn" onclick="openContactModal('${size}')">Interested / Contact Mod</button>
         </div>
       `;
       container.prepend(card);
@@ -374,7 +415,7 @@
       event.target.reset();
     }
 
-    /* AI Helper Logic */
+    /* AI Helper */
     function toggleAI() {
       document.getElementById('ai-box').classList.toggle('active');
     }
@@ -387,13 +428,11 @@
 
       chat.innerHTML += `<div class="msg user">${input.value}</div>`;
 
-      let reply = "I'm here to assist! Register an account to express interest in houses, or contact the mod for support.";
+      let reply = "I'm here to assist! Register an account to express interest in houses or message the moderator.";
       if (query.includes('register') || query.includes('sign up')) {
-        reply = "Click 'Register / Login' at the top to create an account before contacting moderators.";
-      } else if (query.includes('pay') || query.includes('commission') || query.includes('location')) {
-        reply = "To get exact locations, click 'Interested' on any house card and submit Ksh 500 via M-Pesa to 0792102645.";
-      } else if (query.includes('mod') || query.includes('post')) {
-        reply = "Moderators must log in with their key to post vacant houses or broadcast announcements.";
+        reply = "Click 'Register / Login' at the top to register before contacting moderators.";
+      } else if (query.includes('contact') || query.includes('message') || query.includes('mod')) {
+        reply = "Click 'Interested / Contact Mod' on any house listing to send a direct message and transaction code to the moderator.";
       }
 
       setTimeout(() => {
