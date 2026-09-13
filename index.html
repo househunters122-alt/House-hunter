@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HouseHunters - Interactive Portal</title>
+  <title>HouseHunters - Secured Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -59,6 +59,7 @@
       width: 100%; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border);
       border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none; transition: border 0.2s;
     }
+    input[type="file"] { padding: 0.5rem; cursor: pointer; }
     input:focus, select:focus, textarea:focus { border-color: var(--primary); }
     
     .btn {
@@ -85,7 +86,7 @@
     /* Grid & Cards */
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
     .house-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
-    .house-card img { width: 100%; height: 200px; object-fit: cover; }
+    .house-card img, .house-card video { width: 100%; height: 200px; object-fit: cover; background: #000; }
     .house-body { padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
     .price { font-size: 1.25rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.25rem; }
     .badge { display: inline-block; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem; }
@@ -132,7 +133,7 @@
         <span style="font-size: 1.5rem;">📢</span>
         <div>
           <strong style="display: block; font-size: 0.85rem; text-transform: uppercase; opacity: 0.8;">Moderator Announcement</strong>
-          <span id="broadcast-text">Welcome to HouseHunters! Register and send inquiries directly to the moderator to request locations.</span>
+          <span id="broadcast-text">Welcome to HouseHunters! Register and send inquiries directly to the moderator to request house locations.</span>
         </div>
       </div>
 
@@ -181,11 +182,11 @@
     <div id="mod-login-page" class="page">
       <div class="card auth-box">
         <h2 style="margin-bottom: 0.5rem; text-align: center;">Moderator Access 🔒</h2>
-        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Enter the administrative key to manage listings and messages.</p>
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Enter the secret key to unlock the panel.</p>
         <form onsubmit="handleModLogin(event)">
           <div class="form-group">
             <label>Admin Access Code</label>
-            <input type="password" id="mod-key" required placeholder="Secret Code (MOD2026)">
+            <input type="password" id="mod-key" required placeholder="Enter secret code">
           </div>
           <button type="submit" class="btn btn-accent">Unlock Panel</button>
         </form>
@@ -221,7 +222,10 @@
       <div class="card" style="max-width: 650px; margin: 0 auto;">
         <h2 style="margin-bottom: 1rem;">➕ Post Vacant House</h2>
         <form onsubmit="addListing(event)">
-          <div class="form-group"><label>Image URL</label><input type="url" id="mod-image" required placeholder="https://images.unsplash.com/..."></div>
+          <div class="form-group">
+            <label>House Media (Photo or Short Video)</label>
+            <input type="file" id="mod-media" accept="image/*,video/*" required>
+          </div>
           <div class="form-group"><label>Monthly Rent (Ksh)</label><input type="number" id="mod-price" required placeholder="12000"></div>
           <div class="form-group"><label>House Details & Size</label><input type="text" id="mod-size" required placeholder="e.g., 1 Bedroom, Bedsitter, Studio"></div>
           <div class="form-group"><label>Vacant Units Available</label><input type="number" id="mod-vacant" required placeholder="1"></div>
@@ -274,7 +278,7 @@
     let currentUser = null;
     let isModAuthenticated = false;
     let selectedHouse = '';
-    const MOD_PASSCODE = "MOD2026";
+    let secretKey = null; // Key is prompted and set dynamically in session
     const messagesList = [];
 
     function showPage(pageId) {
@@ -298,7 +302,14 @@
     function handleModLogin(e) {
       e.preventDefault();
       const inputCode = document.getElementById('mod-key').value;
-      if (inputCode === MOD_PASSCODE) {
+      
+      if (!secretKey) {
+        secretKey = inputCode;
+        isModAuthenticated = true;
+        showPage('mod-dashboard');
+        document.getElementById('mod-key').value = '';
+        alert('Secret code saved for this session!');
+      } else if (inputCode === secretKey) {
         isModAuthenticated = true;
         showPage('mod-dashboard');
         document.getElementById('mod-key').value = '';
@@ -391,28 +402,43 @@
 
     function addListing(event) {
       event.preventDefault();
-      const image = document.getElementById('mod-image').value;
+      const mediaFile = document.getElementById('mod-media').files[0];
       const price = document.getElementById('mod-price').value;
       const size = document.getElementById('mod-size').value;
       const vacant = document.getElementById('mod-vacant').value;
 
-      const container = document.getElementById('listings-container');
-      const card = document.createElement('div');
-      card.className = 'house-card';
-      card.innerHTML = `
-        <img src="${image}" alt="House">
-        <div class="house-body">
-          <div>
-            <div class="price">Ksh ${Number(price).toLocaleString()} / mo</div>
-            <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">${size}</div>
-            <span class="badge">${vacant} Vacancies Left</span>
+      if (!mediaFile) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const mediaSrc = e.target.result;
+        const isVideo = mediaFile.type.startsWith('video/');
+        
+        const mediaHTML = isVideo 
+          ? `<video src="${mediaSrc}" controls></video>`
+          : `<img src="${mediaSrc}" alt="House">`;
+
+        const container = document.getElementById('listings-container');
+        const card = document.createElement('div');
+        card.className = 'house-card';
+        card.innerHTML = `
+          ${mediaHTML}
+          <div class="house-body">
+            <div>
+              <div class="price">Ksh ${Number(price).toLocaleString()} / mo</div>
+              <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">${size}</div>
+              <span class="badge">${vacant} Vacancies Left</span>
+            </div>
+            <button class="btn" onclick="openContactModal('${size}')">Interested / Contact Mod</button>
           </div>
-          <button class="btn" onclick="openContactModal('${size}')">Interested / Contact Mod</button>
-        </div>
-      `;
-      container.prepend(card);
-      showPage('main-dashboard');
-      event.target.reset();
+        `;
+        
+        container.prepend(card);
+        showPage('main-dashboard');
+        event.target.reset();
+      };
+
+      reader.readAsDataURL(mediaFile);
     }
 
     /* AI Helper */
