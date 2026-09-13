@@ -3,182 +3,300 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HouseHunters - Portal</title>
+  <title>HouseHunters - Modern Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
+      --primary-dark: #1d4ed8;
+      --accent: #10b981;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-card: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --radius: 12px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
 
     /* Navigation */
     header {
-      background-color: var(--card-bg);
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .logo { font-size: 1.25rem; font-weight: bold; color: var(--primary); }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #60a5fa; letter-spacing: -0.5px; }
     nav button {
-      background: none; border: none; font-size: 0.95rem; font-weight: 500;
-      color: var(--text-muted); cursor: pointer; margin-left: 1rem; padding: 0.5rem 0.75rem;
-      border-radius: 6px;
+      background: transparent; border: none; font-size: 0.95rem; font-weight: 500;
+      color: var(--text-muted); cursor: pointer; margin-left: 0.5rem; padding: 0.6rem 1rem;
+      border-radius: var(--radius); transition: all 0.2s;
     }
-    nav button.active, nav button:hover { color: var(--primary); background-color: #eff6ff; }
+    nav button.active, nav button:hover { color: #fff; background-color: var(--surface-card); }
 
-    .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
     .page { display: none; }
     .page.active { display: block; }
 
-    /* Forms */
+    /* Cards & Forms */
     .card {
-      background: var(--card-bg);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.5rem;
+      border-radius: var(--radius);
+      padding: 1.75rem;
       margin-bottom: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
     }
-    .form-group { margin-bottom: 1rem; }
-    label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+    .form-group { margin-bottom: 1.2rem; }
+    label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
     input, select, textarea {
-      width: 100%; padding: 0.6rem; border: 1px solid var(--border);
-      border-radius: 6px; font-size: 0.95rem; outline: none;
+      width: 100%; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: #fff; font-size: 0.95rem; outline: none; transition: border 0.2s;
     }
     input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    
     .btn {
-      background-color: var(--primary); color: white; border: none;
-      padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 500;
-      cursor: pointer; width: 100%; transition: background 0.2s;
+      background: var(--primary); color: white; border: none;
+      padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600;
+      cursor: pointer; width: 100%; transition: all 0.2s; text-align: center;
     }
-    .btn:hover { background-color: var(--primary-hover); }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-accent { background: var(--accent); }
+    .btn-accent:hover { background: #059669; }
 
-    /* Login Box Specifics */
-    .login-box { max-width: 400px; margin: 4rem auto; }
+    .auth-box { max-width: 420px; margin: 3rem auto; }
+    .toggle-auth { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    .toggle-auth a { color: #60a5fa; cursor: pointer; text-decoration: underline; }
 
-    /* Listings Grid */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-    .listing-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .listing-card img { width: 100%; height: 180px; object-fit: cover; }
-    .listing-content { padding: 1rem; }
-    .price { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-bottom: 0.25rem; }
-    .details { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
-    .badge {
-      display: inline-block; background: #dcfce7; color: #166534;
-      padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;
+    /* Broadcast Bar */
+    .broadcast-banner {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      padding: 1rem 1.5rem; border-radius: var(--radius); margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
     }
+
+    /* Grid & Cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .house-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+    .house-card img { width: 100%; height: 200px; object-fit: cover; }
+    .house-body { padding: 1.25rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .price { font-size: 1.25rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.25rem; }
+    .badge { display: inline-block; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem; }
+    
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 200; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--surface); padding: 2rem; border-radius: var(--radius); max-width: 450px; width: 90%; border: 1px solid var(--border); }
+
+    /* Floating AI Chatbot */
+    .ai-widget { position: fixed; bottom: 20px; right: 20px; z-index: 99; }
+    .ai-toggle { width: 55px; height: 55px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.5); }
+    .ai-box { display: none; position: absolute; bottom: 70px; right: 0; width: 320px; height: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .ai-box.active { display: flex; }
+    .ai-header { background: var(--surface-card); padding: 0.75rem 1rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+    .ai-messages { flex-grow: 1; padding: 1rem; overflow-y: auto; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .msg { padding: 0.5rem 0.75rem; border-radius: 8px; max-width: 80%; }
+    .msg.bot { background: var(--surface-card); align-self: flex-start; }
+    .msg.user { background: var(--primary); align-self: flex-end; }
+    .ai-input { display: flex; border-top: 1px solid var(--border); }
+    .ai-input input { border: none; border-radius: 0; }
+    .ai-input button { width: auto; border-radius: 0; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="logo">HouseHunters</div>
+    <div class="logo">🏠 HouseHunters</div>
     <nav>
-      <button onclick="showPage('login-page')" id="nav-login" class="active">Login</button>
-      <button onclick="showPage('user-dashboard')" id="nav-dashboard">User Dashboard</button>
+      <button onclick="showPage('main-dashboard')" id="nav-main" class="active">Main Dashboard</button>
+      <button onclick="showPage('auth-page')" id="nav-auth">Register / Login</button>
       <button onclick="showPage('mod-dashboard')" id="nav-mod">Moderator Panel</button>
     </nav>
   </header>
 
   <div class="container">
-    
-    <!-- LOGIN PAGE -->
-    <div id="login-page" class="page active">
-      <div class="card login-box">
-        <h2 style="margin-bottom: 1rem; text-align: center;">Sign In</h2>
-        <form onsubmit="handleLogin(event)">
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" required placeholder="user@example.com">
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input type="password" required placeholder="••••••••">
-          </div>
-          <div class="form-group">
-            <label>Role</label>
-            <select id="role-select">
-              <option value="user">User</option>
-              <option value="moderator">Moderator</option>
-            </select>
-          </div>
-          <button type="submit" class="btn">Login</button>
-        </form>
-      </div>
-    </div>
 
-    <!-- USER DASHBOARD -->
-    <div id="user-dashboard" class="page">
-      <h2 style="margin-bottom: 1.5rem;">Available Properties & Alerts</h2>
+    <!-- MAIN DASHBOARD -->
+    <div id="main-dashboard" class="page active">
+      
+      <!-- Moderator Broadcast -->
+      <div class="broadcast-banner" id="broadcast-container">
+        <span style="font-size: 1.5rem;">📢</span>
+        <div>
+          <strong style="display: block; font-size: 0.85rem; text-transform: uppercase; opacity: 0.8;">Moderator Announcement</strong>
+          <span id="broadcast-text">Welcome to HouseHunters! Register and unlock location info by securing your room reservation fee.</span>
+        </div>
+      </div>
+
+      <h2 style="margin-bottom: 1.5rem;">Vacant Houses Available</h2>
       <div class="grid" id="listings-container">
-        <!-- Default Posted Item -->
-        <div class="listing-card">
-          <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=600&q=80" alt="Room Image">
-          <div class="listing-content">
-            <div class="price">$1,200 / month</div>
-            <div class="details">Size: 450 sq ft | 2 Rooms</div>
-            <span class="badge">1 Vacancy Available</span>
+        <!-- Sample Listing -->
+        <div class="house-card">
+          <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=600&q=80" alt="House">
+          <div class="house-body">
+            <div>
+              <div class="price">Ksh 15,000 / mo</div>
+              <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">Spacious 2 Bedroom Apartment</div>
+              <span class="badge">2 Vacancies Left</span>
+            </div>
+            <button class="btn" onclick="openContactModal('Spacious 2 Bedroom Apartment')">Interested / Get Location</button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- AUTHENTICATION (REGISTER / LOGIN) -->
+    <div id="auth-page" class="page">
+      <div class="card auth-box" id="register-card">
+        <h2 style="margin-bottom: 1rem; text-align: center;">Register Account</h2>
+        <form onsubmit="handleAuth(event, 'register')">
+          <div class="form-group"><label>Full Name</label><input type="text" required placeholder="John Doe"></div>
+          <div class="form-group"><label>Phone Number</label><input type="tel" required placeholder="0712345678"></div>
+          <div class="form-group"><label>Email Address</label><input type="email" required placeholder="user@example.com"></div>
+          <div class="form-group"><label>Password</label><input type="password" required placeholder="••••••••"></div>
+          <button type="submit" class="btn btn-accent">Create Account</button>
+        </form>
+        <div class="toggle-auth">Already registered? <a onclick="toggleAuthMode(false)">Login here</a></div>
+      </div>
+
+      <div class="card auth-box" id="login-card" style="display: none;">
+        <h2 style="margin-bottom: 1rem; text-align: center;">Sign In</h2>
+        <form onsubmit="handleAuth(event, 'login')">
+          <div class="form-group"><label>Email Address</label><input type="email" required placeholder="user@example.com"></div>
+          <div class="form-group"><label>Password</label><input type="password" required placeholder="••••••••"></div>
+          <button type="submit" class="btn">Sign In</button>
+        </form>
+        <div class="toggle-auth">New user? <a onclick="toggleAuthMode(true)">Register here</a></div>
+      </div>
+    </div>
+
     <!-- MODERATOR DASHBOARD -->
     <div id="mod-dashboard" class="page">
-      <div class="card" style="max-width: 600px; margin: 0 auto;">
-        <h2 style="margin-bottom: 1rem;">Post New Room Alert</h2>
+      <div class="card" style="max-width: 650px; margin: 0 auto 2rem auto;">
+        <h2 style="margin-bottom: 1rem;">📢 Broadcast Announcement</h2>
+        <form onsubmit="postBroadcast(event)">
+          <div class="form-group">
+            <label>Announcement Text</label>
+            <textarea id="mod-broadcast-input" rows="2" required placeholder="Type an update or notification for all users..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-accent">Publish Announcement</button>
+        </form>
+      </div>
+
+      <div class="card" style="max-width: 650px; margin: 0 auto;">
+        <h2 style="margin-bottom: 1rem;">➕ Post Vacant House</h2>
         <form onsubmit="addListing(event)">
-          <div class="form-group">
-            <label>Image URL</label>
-            <input type="url" id="mod-image" required placeholder="https://images.unsplash.com/...">
-          </div>
-          <div class="form-group">
-            <label>Price ($/month)</label>
-            <input type="number" id="mod-price" required placeholder="1200">
-          </div>
-          <div class="form-group">
-            <label>Room Size / Description</label>
-            <input type="text" id="mod-size" required placeholder="e.g., 500 sq ft (Studio)">
-          </div>
-          <div class="form-group">
-            <label>Vacant Rooms Available</label>
-            <input type="number" id="mod-vacant" required placeholder="2">
-          </div>
-          <button type="submit" class="btn">Post Property Alert</button>
+          <div class="form-group"><label>Image URL</label><input type="url" id="mod-image" required placeholder="https://images.unsplash.com/..."></div>
+          <div class="form-group"><label>Monthly Rent (Ksh)</label><input type="number" id="mod-price" required placeholder="12000"></div>
+          <div class="form-group"><label>House Details & Size</label><input type="text" id="mod-size" required placeholder="e.g., 1 Bedroom, Bedsitter, Studio"></div>
+          <div class="form-group"><label>Vacant Units Available</label><input type="number" id="mod-vacant" required placeholder="1"></div>
+          <div class="form-group"><label>Exact Location (Hidden until payment)</label><input type="text" id="mod-location" required placeholder="e.g., Westlands, 3rd Floor, Door B2"></div>
+          <button type="submit" class="btn">Post House Listing</button>
         </form>
       </div>
     </div>
 
   </div>
 
+  <!-- CONTACT & MPESA PAYMENT MODAL -->
+  <div class="modal" id="contact-modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 0.5rem;" id="modal-house-title">House Location Request</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        To unlock exact location & contact moderator directly, complete the commission payment below.
+      </p>
+      
+      <div style="background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem; font-size: 0.9rem;">
+        <p><strong>Commission Amount:</strong> Ksh 500</p>
+        <p><strong>M-Pesa Number:</strong> <span style="color: #60a5fa; font-weight: bold;">0792102645</span></p>
+      </div>
+
+      <form onsubmit="verifyPayment(event)">
+        <div class="form-group">
+          <label>Enter M-Pesa Transaction Code</label>
+          <input type="text" id="mpesa-code" required placeholder="e.g. QX789210AB" style="text-transform: uppercase;">
+        </div>
+        <button type="submit" class="btn btn-accent">Submit Payment Code</button>
+      </form>
+      <button class="btn" onclick="closeModal()" style="margin-top: 0.5rem; background: transparent; color: var(--text-muted);">Cancel</button>
+    </div>
+  </div>
+
+  <!-- AI ASSISTANT WIDGET -->
+  <div class="ai-widget">
+    <button class="ai-toggle" onclick="toggleAI()">🤖</button>
+    <div class="ai-box" id="ai-box">
+      <div class="ai-header">AI Assist Helper</div>
+      <div class="ai-messages" id="ai-messages">
+        <div class="msg bot">Hello! I'm your HouseHunters Assistant. Ask me how to register, view vacant houses, or request house locations!</div>
+      </div>
+      <form class="ai-input" onsubmit="handleAISubmit(event)">
+        <input type="text" id="ai-user-input" placeholder="Type a question..." required>
+        <button type="submit" class="btn">Send</button>
+      </form>
+    </div>
+  </div>
+
   <script>
+    let currentUser = null;
+    let selectedHouse = '';
+
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
       
       document.getElementById(pageId).classList.add('active');
-      if(pageId === 'login-page') document.getElementById('nav-login').classList.add('active');
-      if(pageId === 'user-dashboard') document.getElementById('nav-dashboard').classList.add('active');
+      if(pageId === 'main-dashboard') document.getElementById('nav-main').classList.add('active');
+      if(pageId === 'auth-page') document.getElementById('nav-auth').classList.add('active');
       if(pageId === 'mod-dashboard') document.getElementById('nav-mod').classList.add('active');
     }
 
-    function handleLogin(event) {
+    function toggleAuthMode(showRegister) {
+      document.getElementById('register-card').style.display = showRegister ? 'block' : 'none';
+      document.getElementById('login-card').style.display = showRegister ? 'none' : 'block';
+    }
+
+    function handleAuth(event, type) {
       event.preventDefault();
-      const role = document.getElementById('role-select').value;
-      if (role === 'moderator') {
-        showPage('mod-dashboard');
-      } else {
-        showPage('user-dashboard');
+      currentUser = { registered: true };
+      alert(type === 'register' ? 'Registration successful! You are now logged in.' : 'Logged in successfully!');
+      showPage('main-dashboard');
+      document.getElementById('nav-auth').innerText = 'Account (Logged In)';
+    }
+
+    function openContactModal(houseTitle) {
+      if (!currentUser) {
+        alert('You must register or log in first before requesting a house location!');
+        showPage('auth-page');
+        return;
       }
+      selectedHouse = houseTitle;
+      document.getElementById('modal-house-title').innerText = houseTitle;
+      document.getElementById('contact-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('contact-modal').classList.remove('active');
+    }
+
+    function verifyPayment(event) {
+      event.preventDefault();
+      const code = document.getElementById('mpesa-code').value;
+      alert(`Payment code ${code} submitted! Moderator notified. Details sent to your account.`);
+      closeModal();
+    }
+
+    function postBroadcast(event) {
+      event.preventDefault();
+      const msg = document.getElementById('mod-broadcast-input').value;
+      document.getElementById('broadcast-text').innerText = msg;
+      alert('Announcement published to Main Dashboard!');
+      showPage('main-dashboard');
     }
 
     function addListing(event) {
@@ -190,19 +308,51 @@
 
       const container = document.getElementById('listings-container');
       const card = document.createElement('div');
-      card.className = 'listing-card';
+      card.className = 'house-card';
       card.innerHTML = `
-        <img src="${image}" alt="Property Image">
-        <div class="listing-content">
-          <div class="price">$${price} / month</div>
-          <div class="details">Size: ${size}</div>
-          <span class="badge">${vacant} Vacancy Available</span>
+        <img src="${image}" alt="House">
+        <div class="house-body">
+          <div>
+            <div class="price">Ksh ${Number(price).toLocaleString()} / mo</div>
+            <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">${size}</div>
+            <span class="badge">${vacant} Vacancies Left</span>
+          </div>
+          <button class="btn" onclick="openContactModal('${size}')">Interested / Get Location</button>
         </div>
       `;
-      
       container.prepend(card);
-      showPage('user-dashboard');
+      showPage('main-dashboard');
       event.target.reset();
+    }
+
+    /* AI Helper Logic */
+    function toggleAI() {
+      document.getElementById('ai-box').classList.toggle('active');
+    }
+
+    function handleAISubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-user-input');
+      const query = input.value.toLowerCase();
+      const chat = document.getElementById('ai-messages');
+
+      chat.innerHTML += `<div class="msg user">${input.value}</div>`;
+
+      let reply = "I'm here to assist! Register an account to express interest in houses, or contact the mod for support.";
+      if (query.includes('register') || query.includes('sign up')) {
+        reply = "Click 'Register / Login' at the top to create an account before contacting moderators.";
+      } else if (query.includes('pay') || query.includes('commission') || query.includes('location')) {
+        reply = "To get exact locations, click 'Interested' on any house card and submit Ksh 500 via M-Pesa to 0792102645.";
+      } else if (query.includes('mod') || query.includes('post')) {
+        reply = "Moderators can post vacant houses and broadcast announcements via the Moderator Panel!";
+      }
+
+      setTimeout(() => {
+        chat.innerHTML += `<div class="msg bot">${reply}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+      }, 300);
+
+      input.value = '';
     }
   </script>
 </body>
